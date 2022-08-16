@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$USER_HOME$/Desktop/Abhi/.idea/Abhi.iml" filepath="$USER_HOME$/Desktop/Abhi/.idea/Abhi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../python_codes/.idea/Python_Codes.iml" filepath="$PROJECT_DIR$/../python_codes/.idea/Python_Codes.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Saathvik-Abhinav.iml" filepath="$PROJECT_DIR$/.idea/Saathvik-Abhinav.iml" />
     </modules>
   </component>
