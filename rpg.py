@@ -3,6 +3,8 @@ from pygame.locals import *
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))
+scaling = 3
+backgroud_size = (500, 500)
 clock = pygame.time.Clock()
 
 
@@ -10,41 +12,45 @@ class StaticInvisibleObstacle(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups):
         super().__init__(groups)
         self.image = pygame.Surface(size)
-        self.image.set_alpha(50)
+        self.image.set_alpha(100)
         self.rect = self.image.get_rect(topleft=pos)
         self.old_rect = self.rect.copy()
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, x, y, group, obstacles):
+    def __init__(self, x, y, group, obstacles, scale, backgroundsize):
         super().__init__(group)  # This is to make it such that the player is a sprite and belongs to a group
-        # Defining player movement limits
-        self.top_limit = 0
-        self.left_limit = 0
-        self.bottom_limit = 1000
-        self.right_limit = 1000
 
+        self.new_scale = (32 * scale, 32 * scale)
         self.pos = pygame.math.Vector2(x, y)
-        self.images_up = [pygame.transform.scale(pygame.image.load('Character/Up/Up_1.png'), (64, 64)),
-                          pygame.transform.scale(pygame.image.load('Character/Up/Up_2.png'), (64, 64)),
-                          pygame.transform.scale(pygame.image.load('Character/Up/Up_3.png'), (64, 64))]
-        self.images_down = [pygame.transform.scale(pygame.image.load('Character/Down/Down_1.png'), (64, 64)),
-                            pygame.transform.scale(pygame.image.load('Character/Down/Down_2.png'), (64, 64)),
-                            pygame.transform.scale(pygame.image.load('Character/Down/Down_3.png'), (64, 64))]
-        self.images_left = [pygame.transform.scale(pygame.image.load('Character/Left/Left_1.png'), (64, 64)),
-                            pygame.transform.scale(pygame.image.load('Character/Left/Left_2.png'), (64, 64)),
-                            pygame.transform.scale(pygame.image.load('Character/Left/Left_3.png'), (64, 64))]
-        self.images_right = [pygame.transform.scale(pygame.image.load('Character/Right/Right_1.png'), (64, 64)),
-                             pygame.transform.scale(pygame.image.load('Character/Right/Right_2.png'), (64, 64)),
-                             pygame.transform.scale(pygame.image.load('Character/Right/Right_3.png'), (64, 64))]
-        self.images_static = [pygame.transform.scale(pygame.image.load('Character/Up/Up_Rest.png'), (64, 64)),
-                              pygame.transform.scale(pygame.image.load('Character/Down/Down_Rest.png'), (64, 64)),
-                              pygame.transform.scale(pygame.image.load('Character/Left/Left_Rest.png'), (64, 64)),
-                              pygame.transform.scale(pygame.image.load('Character/Right/Right_Rest.png'), (64, 64))]
+        self.images_up = [pygame.transform.scale(pygame.image.load('Character/Up/Up_1.png'), self.new_scale),
+                          pygame.transform.scale(pygame.image.load('Character/Up/Up_2.png'), self.new_scale),
+                          pygame.transform.scale(pygame.image.load('Character/Up/Up_3.png'), self.new_scale)]
+        self.images_down = [pygame.transform.scale(pygame.image.load('Character/Down/Down_1.png'), self.new_scale),
+                            pygame.transform.scale(pygame.image.load('Character/Down/Down_2.png'), self.new_scale),
+                            pygame.transform.scale(pygame.image.load('Character/Down/Down_3.png'), self.new_scale)]
+        self.images_left = [pygame.transform.scale(pygame.image.load('Character/Left/Left_1.png'), self.new_scale),
+                            pygame.transform.scale(pygame.image.load('Character/Left/Left_2.png'), self.new_scale),
+                            pygame.transform.scale(pygame.image.load('Character/Left/Left_3.png'), self.new_scale)]
+        self.images_right = [pygame.transform.scale(pygame.image.load('Character/Right/Right_1.png'), self.new_scale),
+                             pygame.transform.scale(pygame.image.load('Character/Right/Right_2.png'), self.new_scale),
+                             pygame.transform.scale(pygame.image.load('Character/Right/Right_3.png'), self.new_scale)]
+        self.images_static = [pygame.transform.scale(pygame.image.load('Character/Up/Up_Rest.png'), self.new_scale),
+                              pygame.transform.scale(pygame.image.load('Character/Down/Down_Rest.png'), self.new_scale),
+                              pygame.transform.scale(pygame.image.load('Character/Left/Left_Rest.png'), self.new_scale),
+                              pygame.transform.scale(pygame.image.load('Character/Right/Right_Rest.png'),
+                                                     self.new_scale)]
 
         self.current_direction = 0
         self.current_image = 0
         self.motion = False
+        # Defining player movement limits
+        self.top_limit = pygame.display.get_window_size()[1] // 2 - (self.new_scale[1] // 2) + 2
+        self.left_limit = pygame.display.get_window_size()[0] // 2 - (self.new_scale[0] // 2) + 2
+        self.bottom_limit = backgroundsize[1] * scale - pygame.display.get_window_size()[1] // 2 + (
+                self.new_scale[1] // 2) - 2
+        self.right_limit = backgroundsize[0] * scale - pygame.display.get_window_size()[0] // 2 + (
+                self.new_scale[0] // 2) - 2
 
         self.image = self.images_static[self.current_direction]
         self.rect = self.image.get_rect(topleft=self.pos)
@@ -75,27 +81,6 @@ class Player(pygame.sprite.Sprite):
                     elif self.rect.bottom >= sprite.rect.top and self.old_rect.bottom <= sprite.old_rect.top:
                         self.rect.bottom = sprite.rect.top
                         self.pos.y = self.rect.y
-        # for sprite in collision_sprites:
-        #     if collision_sprites:
-        #         if direction == 'right':
-        #             if self.pos.x + self.rect.size[0] >= sprite.rect.left:
-        #                 print('colided on right')
-        #                 self.pos.x = sprite.rect.left - self.rect.size[0]
-        #                 return 'right'
-        #         elif direction == 'left':
-        #             if self.pos.x <= sprite.rect.right:
-        #                 print('colided on left')
-        #                 return 'left'
-        #         elif direction == 'bottom':
-        #             if self.pos.y + self.rect.size[1] >= sprite.rect.top:
-        #                 print('colided on bottom')
-        #                 return 'bottom'
-        #         elif direction == 'top':
-        #             if self.pos.y <= sprite.rect.bottom:
-        #                 print('colided on top')
-        #                 return 'top'
-        #         else:
-        #             return True
 
     def input(self):
         self.move_direction = pygame.math.Vector2()
@@ -111,6 +96,7 @@ class Player(pygame.sprite.Sprite):
             self.move_direction.x = 1
             self.current_direction = 3
             self.motion = True
+            print(self.right_limit, '\n', self.rect.right)
         if keys[K_w] and self.rect.top > self.top_limit:
             self.move_direction.y = -1
             self.current_direction = 0
@@ -123,10 +109,6 @@ class Player(pygame.sprite.Sprite):
             self.speed = 5
         else:
             self.speed = 3
-        #
-        # if self.move_direction.magnitude() != 0:
-        #     self.move_direction = self.move_direction.normalize()
-        #
 
     def update(self):
         self.old_rect = self.rect.copy()
@@ -177,14 +159,15 @@ class Player(pygame.sprite.Sprite):
 
 
 class CameraGroup(pygame.sprite.Group):
-    def __init__(self, scale):
+    def __init__(self, scale, image_size):
         super().__init__()
 
         self.display_surface = pygame.display.get_surface()
         self.camera_offset = pygame.math.Vector2()
         [self.half_w, self.half_h] = [self.display_surface.get_size()[0] // 2, self.display_surface.get_size()[1] // 2]
 
-        self.ground_surface = pygame.transform.scale(pygame.image.load('TestMap.png').convert(), (1000, 1000))
+        self.ground_surface = pygame.transform.scale(pygame.image.load('TestMap.png').convert(),
+                                                     (image_size[0] * scale, image_size[0] * scale))
         self.ground_rect = self.ground_surface.get_rect(topleft=(0, 0))
 
     def centre_target_camera(self, target):
@@ -195,22 +178,25 @@ class CameraGroup(pygame.sprite.Group):
         self.centre_target_camera(target)
         self.display_surface.blit(self.ground_surface, self.ground_rect.topleft - self.camera_offset)
 
-        for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
+        for sprite in sorted(self.sprites(), key=lambda sprites: sprites.rect.centery):
             offset_pos = sprite.rect.topleft - self.camera_offset
             self.display_surface.blit(sprite.image, offset_pos)
 
 
-camera_group = CameraGroup(2)
+camera_group = CameraGroup(scaling, backgroud_size)
 obstacle_group = pygame.sprite.Group()
 
-Obstacle1 = StaticInvisibleObstacle((0, 100), (800, 100), [obstacle_group, camera_group])
-Obstacle2 = StaticInvisibleObstacle((500, 200), (300, 400), [obstacle_group, camera_group])
-Obstacle3 = StaticInvisibleObstacle((100, 300), (300, 300), [obstacle_group, camera_group])
-Obstacle4 = StaticInvisibleObstacle((0, 700), (400, 300), [obstacle_group, camera_group])
-Obstacle5 = StaticInvisibleObstacle((900, 0), (100, 1000), [obstacle_group, camera_group])
-Obstacle6 = StaticInvisibleObstacle((500, 700), (300, 300), [obstacle_group, camera_group])
+Obstacle1 = StaticInvisibleObstacle((0, 50 * scaling), (400 * scaling, 50 * scaling), [obstacle_group, camera_group])
+Obstacle2 = StaticInvisibleObstacle((250 * scaling, 100 * scaling), (150 * scaling, 200 * scaling),
+                                    [obstacle_group, camera_group])
+Obstacle3 = StaticInvisibleObstacle((50 * scaling, 150 * scaling), (150 * scaling, 150 * scaling),
+                                    [obstacle_group, camera_group])
+Obstacle4 = StaticInvisibleObstacle((0, 350 * scaling), (200 * scaling, 150 * scaling), [obstacle_group, camera_group])
+Obstacle5 = StaticInvisibleObstacle((450 * scaling, 0), (50 * scaling, 500 * scaling), [obstacle_group, camera_group])
+Obstacle6 = StaticInvisibleObstacle((250 * scaling, 350 * scaling), (150 * scaling, 150 * scaling),
+                                    [obstacle_group, camera_group])
 
-player = Player(430, 500, camera_group, obstacle_group)
+player = Player(218 * scaling, 218 * scaling, camera_group, obstacle_group, scaling, backgroud_size)
 
 while True:
     for event in pygame.event.get():
