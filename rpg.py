@@ -4,7 +4,7 @@ from pygame.locals import *
 pygame.init()
 window = pygame.display.set_mode((800, 600))
 scaling = 3
-backgroud_size = (500, 500)
+backgroud_size = pygame.image.load('TestMap.png').get_size()
 clock = pygame.time.Clock()
 
 
@@ -12,7 +12,7 @@ class StaticInvisibleObstacle(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups):
         super().__init__(groups)
         self.image = pygame.Surface(size)
-        self.image.set_alpha(100)
+        self.image.set_alpha(0)
         self.rect = self.image.get_rect(topleft=pos)
         self.old_rect = self.rect.copy()
 
