@@ -3,7 +3,7 @@ from pygame.locals import *
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))
-scaling = 3
+scaling = 3  # dont set above 10. --> cuz computer will CRASH BADLY!!!
 backgroud_size = pygame.image.load('TestMap.png').get_size()
 clock = pygame.time.Clock()
 
@@ -20,7 +20,7 @@ class StaticInvisibleObstacle(pygame.sprite.Sprite):
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y, group, obstacles, scale, backgroundsize):
         super().__init__(group)  # This is to make it such that the player is a sprite and belongs to a group
-
+        self.zoom = scale
         self.new_scale = (32 * scale, 32 * scale)
         self.pos = pygame.math.Vector2(x, y)
         self.images_up = [pygame.transform.scale(pygame.image.load('Character/Up/Up_1.png'), self.new_scale),
@@ -57,7 +57,7 @@ class Player(pygame.sprite.Sprite):
 
         self.obstacles = obstacles
 
-        self.speed = 3
+        self.speed = 3 * self.zoom
         self.anim_speed = 0.1
         self.move_direction = pygame.math.Vector2()
         self.old_rect = self.rect.copy()
@@ -96,7 +96,6 @@ class Player(pygame.sprite.Sprite):
             self.move_direction.x = 1
             self.current_direction = 3
             self.motion = True
-            print(self.right_limit, '\n', self.rect.right)
         if keys[K_w] and self.rect.top > self.top_limit:
             self.move_direction.y = -1
             self.current_direction = 0
@@ -106,9 +105,9 @@ class Player(pygame.sprite.Sprite):
             self.current_direction = 1
             self.motion = True
         if keys[K_SPACE]:
-            self.speed = 5
+            self.speed = 5 * self.zoom
         else:
-            self.speed = 3
+            self.speed = 3 * self.zoom
 
     def update(self):
         self.old_rect = self.rect.copy()
@@ -183,27 +182,97 @@ class CameraGroup(pygame.sprite.Group):
             self.display_surface.blit(sprite.image, offset_pos)
 
 
-camera_group = CameraGroup(scaling, backgroud_size)
-obstacle_group = pygame.sprite.Group()
+class Game:
+    def __init__(self):
+        self.game_mode = 'menu'
+        self.screens = [self.menuScreen]
+        self.is_fade = False
+        self.fade_value = 0
+        self.un_fade = False
+        self.fade_screens = []
+        self.fade_speed = 10
 
-Obstacle1 = StaticInvisibleObstacle((0, 50 * scaling), (400 * scaling, 50 * scaling), [obstacle_group, camera_group])
-Obstacle2 = StaticInvisibleObstacle((250 * scaling, 100 * scaling), (150 * scaling, 200 * scaling),
-                                    [obstacle_group, camera_group])
-Obstacle3 = StaticInvisibleObstacle((50 * scaling, 150 * scaling), (150 * scaling, 150 * scaling),
-                                    [obstacle_group, camera_group])
-Obstacle4 = StaticInvisibleObstacle((0, 350 * scaling), (200 * scaling, 150 * scaling), [obstacle_group, camera_group])
-Obstacle5 = StaticInvisibleObstacle((450 * scaling, 0), (50 * scaling, 500 * scaling), [obstacle_group, camera_group])
-Obstacle6 = StaticInvisibleObstacle((250 * scaling, 350 * scaling), (150 * scaling, 150 * scaling),
-                                    [obstacle_group, camera_group])
+    def menuScreen(self):
+        window.fill((0, 0, 0))
+        self.menu_image = pygame.image.load('Menu.png')
+        self.play_button_image = pygame.image.load('Play_button.png')
+        self.play_rect = self.play_button_image.get_rect(topleft=(350, 300))
+        self.image_2 = pygame.image.load('Play_button.png')
+        self.image2_rect = self.play_button_image.get_rect(topleft=(350, 400))
+        window.blit(self.menu_image, (0, 0))
+        window.blit(self.play_button_image, self.play_rect)
+        window.blit(self.image_2, self.image2_rect)
 
-player = Player(218 * scaling, 218 * scaling, camera_group, obstacle_group, scaling, backgroud_size)
+    def if_clicked(self, pos):
+        if self.play_rect.collidepoint(pos):
+            self.fade_screens = [self.menuScreen, self.mainGame]
+            self.is_fade = True
 
+    def initiateMainGame(self):
+        self.camera_group = CameraGroup(scaling, backgroud_size)
+        self.obstacle_group = pygame.sprite.Group()
+
+        self.Obstacle1 = StaticInvisibleObstacle((0, 50 * scaling), (400 * scaling, 50 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.Obstacle2 = StaticInvisibleObstacle((250 * scaling, 100 * scaling), (150 * scaling, 200 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.Obstacle3 = StaticInvisibleObstacle((50 * scaling, 150 * scaling), (150 * scaling, 150 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.Obstacle4 = StaticInvisibleObstacle((0, 350 * scaling), (200 * scaling, 150 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.Obstacle5 = StaticInvisibleObstacle((450 * scaling, 0), (50 * scaling, 500 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.Obstacle6 = StaticInvisibleObstacle((250 * scaling, 350 * scaling), (150 * scaling, 150 * scaling),
+                                                 [self.obstacle_group, self.camera_group])
+        self.player = Player(218 * scaling, 218 * scaling, self.camera_group, self.obstacle_group, scaling,
+                             backgroud_size)
+
+    def fade(self):
+        if not self.un_fade:
+            self.fade_screens[0]()
+            self.block_surf = pygame.Surface((800, 600))
+            self.block_surf.fill((0, 0, 0))
+            self.block_surf.set_alpha(self.fade_value)
+            window.blit(self.block_surf, (0, 0))
+            self.fade_value += self.fade_speed
+            if self.fade_value >= 256:
+                self.fade_value = 255
+                self.un_fade = True
+            pygame.display.update()
+        else:
+            self.fade_screens[1]()
+            self.block_surf = pygame.Surface((800, 600))
+            self.block_surf.fill((0, 0, 0))
+            self.block_surf.set_alpha(self.fade_value)
+            window.blit(self.block_surf, (0, 0))
+            self.fade_value -= self.fade_speed
+            if self.fade_value < 0:
+                self.fade_value = 0
+                self.un_fade = False
+                self.screens = [self.fade_screens[1]]
+                self.fade_screens = []
+                self.is_fade = False
+
+    def mainGame(self):
+        window.fill((0, 0, 0))
+        self.camera_group.update()
+        self.camera_group.custom_draw(self.player)
+
+    def run(self):
+        for i in self.screens:
+            i()
+
+
+game = Game()
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
-    window.fill((0, 0, 0))
-    camera_group.update()
-    camera_group.custom_draw(player)
+        if event.type == MOUSEBUTTONDOWN and game.game_mode == 'menu':
+            game.initiateMainGame()
+            game.if_clicked(event.pos)
+    game.run()
+    if game.is_fade:
+        game.fade()
     pygame.display.update()
     clock.tick(60)
