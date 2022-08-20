@@ -252,6 +252,7 @@ class Game:
                 self.screens = [self.fade_screens[1]]
                 self.fade_screens = []
                 self.is_fade = False
+                self.game_mode = "main_game"
 
     def mainGame(self):
         window.fill((0, 0, 0))
