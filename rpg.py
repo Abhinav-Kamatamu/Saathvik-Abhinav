@@ -4,7 +4,8 @@ from pygame.locals import *
 pygame.init()
 window = pygame.display.set_mode((800, 600))
 scaling = 3  # dont set above 10. --> cuz computer will CRASH BADLY!!!
-backgroud_size = pygame.image.load('TestMap.png').get_size()
+backgroud_image = pygame.image.load('TestMap_2.png')
+backgroud_size = pygame.image.load('TestMap_2.png').get_size()
 clock = pygame.time.Clock()
 
 
@@ -12,7 +13,7 @@ class StaticInvisibleObstacle(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups):
         super().__init__(groups)
         self.image = pygame.Surface(size)
-        self.image.set_alpha(0)
+        self.image.set_alpha(50)
         self.rect = self.image.get_rect(topleft=pos)
         self.old_rect = self.rect.copy()
 
@@ -165,7 +166,7 @@ class CameraGroup(pygame.sprite.Group):
         self.camera_offset = pygame.math.Vector2()
         [self.half_w, self.half_h] = [self.display_surface.get_size()[0] // 2, self.display_surface.get_size()[1] // 2]
 
-        self.ground_surface = pygame.transform.scale(pygame.image.load('TestMap.png').convert(),
+        self.ground_surface = pygame.transform.scale(backgroud_image.convert(),
                                                      (image_size[0] * scale, image_size[0] * scale))
         self.ground_rect = self.ground_surface.get_rect(topleft=(0, 0))
 
@@ -193,7 +194,7 @@ class Game:
         self.fade_speed = 10
 
     def menuScreen(self):
-        window.fill((0, 0, 0))
+        window.fill((255, 255, 255))
         self.menu_image = pygame.image.load('Menu.png')
         self.play_button_image = pygame.image.load('Play_button.png')
         self.play_rect = self.play_button_image.get_rect(topleft=(350, 300))
@@ -211,7 +212,15 @@ class Game:
     def initiateMainGame(self):
         self.camera_group = CameraGroup(scaling, backgroud_size)
         self.obstacle_group = pygame.sprite.Group()
-
+        # self.obstacle_list = [
+        #   [(0, 50), (400, 50)],
+        #  [(250, 100), (150, 200)]
+        # [(50, 150), (150, 150)],
+        # [],
+        #    [],
+        #   [],
+        # ]
+        # generateObstacles(self.obstacle_list, self)
         self.Obstacle1 = StaticInvisibleObstacle((0, 50 * scaling), (400 * scaling, 50 * scaling),
                                                  [self.obstacle_group, self.camera_group])
         self.Obstacle2 = StaticInvisibleObstacle((250 * scaling, 100 * scaling), (150 * scaling, 200 * scaling),
@@ -231,7 +240,7 @@ class Game:
         if not self.un_fade:
             self.fade_screens[0]()
             self.block_surf = pygame.Surface((800, 600))
-            self.block_surf.fill((0, 0, 0))
+            self.block_surf.fill((255, 255, 255))
             self.block_surf.set_alpha(self.fade_value)
             window.blit(self.block_surf, (0, 0))
             self.fade_value += self.fade_speed
@@ -242,7 +251,7 @@ class Game:
         else:
             self.fade_screens[1]()
             self.block_surf = pygame.Surface((800, 600))
-            self.block_surf.fill((0, 0, 0))
+            self.block_surf.fill((255, 255, 255))
             self.block_surf.set_alpha(self.fade_value)
             window.blit(self.block_surf, (0, 0))
             self.fade_value -= self.fade_speed
@@ -255,13 +264,25 @@ class Game:
                 self.game_mode = "main_game"
 
     def mainGame(self):
-        window.fill((0, 0, 0))
+        window.fill((255, 255, 255))
         self.camera_group.update()
         self.camera_group.custom_draw(self.player)
 
     def run(self):
         for i in self.screens:
             i()
+
+
+def generateObstacles(obstacles, parent):
+    pos_list = []
+    size_list = []
+    for obstacle in obstacles:
+        pos_list.append((obstacle[0][0] * scaling, obstacle[0][1] * scaling))
+        size_list.append((obstacle[1][0] * scaling, obstacle[1][1] * scaling))
+    print(pos_list, size_list)
+    new_list = [StaticInvisibleObstacle(pos_list[i], size_list[i], [parent.obstacle_group, parent.camera_group]) for i
+                in range(len(obstacles))]
+    print(new_list)
 
 
 game = Game()
