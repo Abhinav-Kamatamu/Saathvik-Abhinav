@@ -3,7 +3,7 @@ from pygame.locals import *
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))
-scaling = 3  # dont set above 10. --> cuz computer will CRASH BADLY!!!
+scaling = 5  # dont set above 10. --> cuz computer will CRASH BADLY!!!
 backgroud_image = pygame.image.load('TestMap_2.png')
 backgroud_size = pygame.image.load('TestMap_2.png').get_size()
 clock = pygame.time.Clock()
@@ -13,7 +13,7 @@ class StaticInvisibleObstacle(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups):
         super().__init__(groups)
         self.image = pygame.Surface(size)
-        self.image.set_alpha(50)
+        self.image.set_alpha(0)
         self.rect = self.image.get_rect(topleft=pos)
         self.old_rect = self.rect.copy()
 
@@ -212,27 +212,51 @@ class Game:
     def initiateMainGame(self):
         self.camera_group = CameraGroup(scaling, backgroud_size)
         self.obstacle_group = pygame.sprite.Group()
-        # self.obstacle_list = [
-        #   [(0, 50), (400, 50)],
-        #  [(250, 100), (150, 200)]
-        # [(50, 150), (150, 150)],
-        # [],
-        #    [],
-        #   [],
-        # ]
-        # generateObstacles(self.obstacle_list, self)
-        self.Obstacle1 = StaticInvisibleObstacle((0, 50 * scaling), (400 * scaling, 50 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
-        self.Obstacle2 = StaticInvisibleObstacle((250 * scaling, 100 * scaling), (150 * scaling, 200 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
-        self.Obstacle3 = StaticInvisibleObstacle((50 * scaling, 150 * scaling), (150 * scaling, 150 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
-        self.Obstacle4 = StaticInvisibleObstacle((0, 350 * scaling), (200 * scaling, 150 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
-        self.Obstacle5 = StaticInvisibleObstacle((450 * scaling, 0), (50 * scaling, 500 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
-        self.Obstacle6 = StaticInvisibleObstacle((250 * scaling, 350 * scaling), (150 * scaling, 150 * scaling),
-                                                 [self.obstacle_group, self.camera_group])
+        self.obstacle_list = [
+            [(0, 0), (200, 1500)],
+            [(200, 0), (1300, 150)],
+            [(1300, 150), (200, 1350)],
+            [(200, 1350), (1100, 150)],
+            [(250, 200), (200, 350)],
+            [(500, 200), (350, 150)],
+            [(850, 200), (100, 100)],
+            [(1000, 200), (250, 150)],
+            [(500, 400), (300, 150)],
+            [(850, 500), (150, 150)],
+            [(800, 400), (450, 50)],
+            [(900, 350), (50, 50)],
+            [(1200, 450), (50, 850)],
+            [(1050, 600), (100, 150)],
+            [(850, 650), (50, 50)],
+            [(950, 700), (100, 50)],
+            [(1000, 500), (150, 50)],
+            [(1100, 550), (50, 50)],
+            [(250, 600), (450, 50)],
+            [(400, 650), (300, 50)],
+            [(750, 750), (200, 100)],
+            [(750, 550), (50, 200)],
+            [(1000, 800), (200, 150)],
+            [(1000, 950), (50, 100)],
+            [(900, 850), (50, 300)],
+            [(250, 950), (50, 100)],
+            [(300, 1000), (50, 50)],
+            [(400, 750), (50, 450)],
+            [(450, 800), (250, 50)],
+            [(500, 750), (200, 50)],
+            [(250, 1100), (150, 50)],
+            [(250, 1150), (50, 150)],
+            [(350, 1200), (50, 100)],
+            [(650, 850), (50, 150)],
+            [(700, 900), (150, 100)],
+            [(850, 1200), (350, 100)],
+            [(500, 900), (100, 250)],
+            [(600, 1050), (300, 100)],
+            [(1100, 1000), (50, 150)],
+            [(950, 1100), (150, 50)],
+            [(450, 1200), (350, 100)],
+            [(250, 650), (100, 300)]
+        ]
+        generateObstacles(self.obstacle_list, self)
         self.player = Player(218 * scaling, 218 * scaling, self.camera_group, self.obstacle_group, scaling,
                              backgroud_size)
 
@@ -274,15 +298,10 @@ class Game:
 
 
 def generateObstacles(obstacles, parent):
-    pos_list = []
-    size_list = []
-    for obstacle in obstacles:
-        pos_list.append((obstacle[0][0] * scaling, obstacle[0][1] * scaling))
-        size_list.append((obstacle[1][0] * scaling, obstacle[1][1] * scaling))
-    print(pos_list, size_list)
-    new_list = [StaticInvisibleObstacle(pos_list[i], size_list[i], [parent.obstacle_group, parent.camera_group]) for i
-                in range(len(obstacles))]
-    print(new_list)
+    pos_list = [(obstacle[0][0] * scaling, obstacle[0][1] * scaling) for obstacle in obstacles]
+    size_list = [(obstacle[1][0] * scaling, obstacle[1][1] * scaling) for obstacle in obstacles]
+    for i in range(len(obstacles)):
+        StaticInvisibleObstacle(pos_list[i], size_list[i], [parent.obstacle_group, parent.camera_group])
 
 
 game = Game()
