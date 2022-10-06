@@ -3,7 +3,7 @@ from pygame.locals import *
 
 pygame.init()
 window = pygame.display.set_mode((800, 600))
-scaling = 5  # dont set above 10. --> cuz computer will CRASH BADLY!!!
+scaling = 3  # dont set above 10. --> cuz computer will CRASH BADLY!!!
 backgroud_image = pygame.image.load('TestMap_2.png')
 backgroud_size = pygame.image.load('TestMap_2.png').get_size()
 clock = pygame.time.Clock()
@@ -271,6 +271,10 @@ class Game:
             if self.fade_value >= 256:
                 self.fade_value = 255
                 self.un_fade = True
+                # Plays music
+                pygame.mixer.music.load('Draft (1).wav')
+                pygame.mixer.music.set_volume(6)
+                pygame.mixer.music.play(-1, fade_ms=3000)
             pygame.display.update()
         else:
             self.fade_screens[1]()
