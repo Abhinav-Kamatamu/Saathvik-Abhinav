@@ -17,4 +17,4 @@ class Hi:
 
 
 hi = Hi()
-#hi.run()
+hi.run()
