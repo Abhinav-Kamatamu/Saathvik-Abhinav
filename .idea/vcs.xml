@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$USER_HOME$/Desktop/Abhi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../python_codes" vcs="Git" />
   </component>
 </project>
